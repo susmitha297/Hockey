@@ -1,0 +1,315 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "hockey",
+          "mode": "list",
+          "cachedResultName": "hockey"
+        },
+        "options": {
+          "clearNamespace": false,
+          "pineconeNamespace": "sushmithashylu"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "e47656a4-b756-4667-a6bb-683772c997dc",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "oRbDsSKWDrFFTaZv",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/embedding-001"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        320
+      ],
+      "id": "ad367bf3-528a-4d45-9d7f-1e433924195e",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "i05U9H2eQOnlaKSv",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [
+        660,
+        260
+      ],
+      "id": "5fbd944c-131c-45ea-87e4-17de482956a8",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "chunkSize": 400,
+        "chunkOverlap": 10,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        500,
+        440
+      ],
+      "id": "97b1f142-2424-404d-8f96-9fb44eeaed25",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {},
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -20,
+        0
+      ],
+      "id": "1c966ecf-9f66-4a9a-af53-522e41fedb32",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "7X2kHepVkeM2fYCU",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -300,
+        620
+      ],
+      "id": "4f2044be-92e7-4cfa-a2b2-115cde3607ac",
+      "name": "When chat message received",
+      "webhookId": "dbe98744-da99-414b-b1a3-6b8f3c668a7b"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=read the following the input given by the user \"{{ $json.chatInput }}\" and answer to the query \n\n\n\ncontext : the vector store that is connect to you i.e., \"out_events\" stores data about dismissals in cricket, so when searching the vector store based on the chatinput\"{{ $json.chatInput }}\" change the query that is given to the vector store to relevant keyword that are in cricket commentary specifically in dismissals",
+        "options": {
+          "systemMessage": "You are a LLM in a RAG application"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -20,
+        620
+      ],
+      "id": "66eebe48-4bf3-4bd1-b76f-3ed6e29ccda6",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "out_events",
+        "toolDescription": "=Retrieve the relevanlt documents and gives to ai agent",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "hockey",
+          "mode": "list",
+          "cachedResultName": "hockey"
+        },
+        "topK": 5,
+        "options": {
+          "pineconeNamespace": "sushmithashylu"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.1,
+      "position": [
+        360,
+        820
+      ],
+      "id": "feb36c5a-f5ba-411a-9942-3698ac45e4fc",
+      "name": "Pinecone Vector Store1",
+      "credentials": {
+        "pineconeApi": {
+          "id": "oRbDsSKWDrFFTaZv",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        920
+      ],
+      "id": "5bd7da55-4159-44aa-86a2-4d977e9cfec8",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ehRu0EeAYIIxvDzW",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/embedding-001"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        660,
+        980
+      ],
+      "id": "f866daff-75d2-4c75-a02a-c133f9b05a45",
+      "name": "Embeddings Google Gemini1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ehRu0EeAYIIxvDzW",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d4895f3e-3afa-4b43-9d60-9b75a7d671fc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5c7ad7e2506d3d4367813d18101bb239fada17b413f34adb7147dddc46b460d7"
+  },
+  "id": "4gFBQNAYZvARFbvS",
+  "tags": []
+}
